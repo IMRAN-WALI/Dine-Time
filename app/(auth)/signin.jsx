@@ -1,21 +1,21 @@
 /* eslint-disable react/no-unescaped-entities */
 import { Formik } from "formik";
 import {
-  Image,
-  ScrollView,
-  StatusBar,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Image,
+    ScrollView,
+    StatusBar,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import entryImg from "../../assets/images/Frame.png";
 import Logo from "../../assets/images/MainLogo.png";
 import validationSchema from "../../utils/authSchema";
 
-const signup = () => {
-  const handleSignup = () => {};
+const signin = () => {
+  const handleSignin = () => {};
 
   return (
     <SafeAreaView className="flex-1 bg-[#2b2b2b]">
@@ -30,7 +30,7 @@ const signup = () => {
             <Formik
               initialValues={{ email: "", password: "" }}
               validationSchema={validationSchema}
-              onSubmit={handleSignup}
+              onSubmit={handleSignin}
             >
               {({
                 handleChange,
@@ -73,7 +73,7 @@ const signup = () => {
                     className="p-2 my-2 bg-[#f49b33] text-black rounded-lg mt-10"
                   >
                     <Text className="text-lg font-semibold text-center">
-                      Sign up
+                      Sign in
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -90,4 +90,4 @@ const signup = () => {
   );
 };
 
-export default signup;
+export default signin;

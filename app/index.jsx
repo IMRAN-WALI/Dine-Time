@@ -18,7 +18,7 @@ export default function Index() {
       <StatusBar barStyle={"light-content"} backgroundColor={"#2b2b2b"} />
       <ScrollView contentContainerStyle={{ height: "100%" }}>
         <View className="m-2 flex justify-center items-center">
-          <Image source={Logo} style={{ width: 300, height: 300 }} />
+          <Image source={Logo} style={{ width: 350, height: 350 }} />
           <View className="w-3/4">
             <TouchableOpacity
               onPress={() => router.push("/signup")}
@@ -43,7 +43,7 @@ export default function Index() {
           </View>
           <TouchableOpacity
             className="flex flex-row justify-center items-center"
-            onPress={() => router.push("/signup")}
+            onPress={() => router.push("/signin")}
           >
             <Text className="text-white font-semibold">Already a User? </Text>
             <Text className="text-base font-semibold underline text-[#f49b33]">
