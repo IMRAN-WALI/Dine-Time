@@ -8,27 +8,27 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Logo from "../assets/images/MainLogo.png";
+import Logo from "../assets/images/FirstPage.png";
 import entryImg from "../assets/images/Frame.png";
 
 export default function Index() {
   const router = useRouter();
   return (
-    <SafeAreaView className="flex-1 bg-[#2b2b2b]">
+    <SafeAreaView className=" bg-[#2b2b2b]">
       <StatusBar barStyle={"light-content"} backgroundColor={"#2b2b2b"} />
       <ScrollView contentContainerStyle={{ height: "100%" }}>
-        <View className="m-2 flex justify-center items-center">
-          <Image source={Logo} style={{ width: 350, height: 350 }} />
+        <View className="flex justify-center items-center">
+          <Image source={Logo} style={{ width: 400, height: 400 }} />
           <View className="w-3/4">
             <TouchableOpacity
               onPress={() => router.push("/signup")}
-              className="p-2 my-2 bg-[#f49b33] text-black rounded-lg"
+              className="p-2 bg-[#f49b33] text-black rounded-lg"
             >
               <Text className="text-lg font-semibold text-center">Sign up</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push("/home")}
-              className="p-2 my-2 bg-[#2b2b2b] border border-[#f49b33] rounded-lg max-w-fit"
+              className="p-2 my-4 bg-[#2b2b2b] border border-[#f49b33] rounded-lg max-w-fit"
             >
               <Text className="text-lg text-[#f49b33] font-semibold text-center">
                 Guest User

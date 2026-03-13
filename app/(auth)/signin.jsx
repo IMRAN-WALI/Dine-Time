@@ -32,7 +32,7 @@ const Signin = () => {
       <StatusBar barStyle={"light-content"} backgroundColor={"#2b2b2b"} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="m-2 flex justify-center items-center">
-          <Image source={Logo} style={{ width: 200, height: 200 }} />
+          <Image source={Logo} style={{ width: 150, height: 150 }} />
           <Text className="text-3xl text-center text-white font-bold mb-4">
             Welcome Back!
           </Text>
@@ -52,7 +52,6 @@ const Signin = () => {
                 touched,
               }) => (
                 <View className="w-full">
-                  {/* Email Field */}
                   <Text className="text-[#f49b33] text-lg font-semibold mt-4 mb-2">
                     Email
                   </Text>
@@ -75,7 +74,6 @@ const Signin = () => {
                     </Text>
                   )}
 
-                  {/* Password Field */}
                   <Text className="text-[#f49b33] text-lg font-semibold mt-4 mb-2">
                     Password
                   </Text>
@@ -121,7 +119,6 @@ const Signin = () => {
                     </Text>
                   </TouchableOpacity>
 
-                  {/* Sign In Button */}
                   <TouchableOpacity
                     onPress={handleSubmit}
                     className="py-3 my-6 bg-[#f49b33] rounded-lg"
@@ -131,7 +128,6 @@ const Signin = () => {
                     </Text>
                   </TouchableOpacity>
 
-                  {/* Sign Up Link with Underline */}
                   <View className="flex-row justify-center items-center">
                     <Text className="text-white">Don't have an account? </Text>
                     <TouchableOpacity onPress={() => router.push("/signup")}>
@@ -146,7 +142,6 @@ const Signin = () => {
           </View>
         </View>
 
-        {/* Bottom Image */}
         <View className="flex-1 justify-end">
           <Image source={entryImg} className="w-full" resizeMode="contain" />
         </View>
