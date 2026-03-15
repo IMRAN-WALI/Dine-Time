@@ -1,11 +1,6 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyB0e8r0Z-g-WQY7k7Q8d5EXy8Ayq_hfWMg",
   authDomain: "dine-time-9c15c.firebaseapp.com",
@@ -16,15 +11,9 @@ const firebaseConfig = {
   measurementId: "G-G0NNDNKVWE",
 };
 
-try {
-  app = initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  console.log("✅ Firebase initialized successfully!");
-  console.log("🔥 Firestore DB:", db ? "Ready" : "Not ready");
-} catch (error) {
-  console.error("❌ Firebase initialization error:", error);
-}
+// ✅ Prevent multiple initialization
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+
+console.log("✅ Firebase Connected");
