@@ -37,7 +37,7 @@ const Home = () => {
 
       setRestaurants(data);
     } catch (error) {
-      console.error("Error fetching restaurants:", error);
+      console.log("Error fetching restaurants:", error);
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,12 @@ const Home = () => {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() => router.push(`/restaurent/${item.name}`)}
+      onPress={() =>
+        router.push({
+          pathname: "/restaurent/[restaurant]",
+          params: { restaurant: item.name },
+        })
+      }
       className="bg-[#3f3f3f] rounded-2xl p-3 mr-4 w-56 shadow-lg"
     >
       <Image
@@ -112,7 +117,7 @@ const Home = () => {
     <SafeAreaView
       style={[
         { backgroundColor: "#2b2b2b", flex: 1 },
-        Platform.OS === "android" && { paddingBottom: 55 },
+        Platform.OS === "android" && { paddingBottom: 1 },
         Platform.OS === "ios" && { paddingBottom: 20 },
       ]}
     >

@@ -52,7 +52,6 @@ const Signup = () => {
                 touched,
               }) => (
                 <View className="w-full">
-                  {/* Email Field */}
                   <Text className="text-[#f49b33] text-lg font-semibold mt-4 mb-2">
                     Email
                   </Text>
@@ -75,7 +74,6 @@ const Signup = () => {
                     </Text>
                   )}
 
-                  {/* Password Field */}
                   <Text className="text-[#f49b33] text-lg font-semibold mt-4 mb-2">
                     Password
                   </Text>
@@ -111,7 +109,6 @@ const Signup = () => {
                     </Text>
                   )}
 
-                  {/* Sign Up Button */}
                   <TouchableOpacity
                     onPress={handleSubmit}
                     className="py-3 my-6 bg-[#f49b33] rounded-lg"
@@ -121,7 +118,6 @@ const Signup = () => {
                     </Text>
                   </TouchableOpacity>
 
-                  {/* Sign In Link with Underline */}
                   <View className="flex-row justify-center items-center">
                     <Text className="text-white">
                       Already have an account?{" "}
@@ -138,7 +134,6 @@ const Signup = () => {
           </View>
         </View>
 
-        {/* Bottom Image */}
         <View className="flex-1 justify-end">
           <Image source={entryImg} className="w-full" resizeMode="contain" />
         </View>

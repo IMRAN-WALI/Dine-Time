@@ -109,7 +109,6 @@ const Signin = () => {
                     </Text>
                   )}
 
-                  {/* Forgot Password Link */}
                   <TouchableOpacity
                     onPress={() => router.push("/forgot-password")}
                     className="self-end mt-2"
