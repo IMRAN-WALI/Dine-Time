@@ -27,14 +27,11 @@ const Home = () => {
   const getRestaurants = async () => {
     try {
       setLoading(true);
-
       const querySnapshot = await getDocs(collection(db, "restaurants"));
-
       const data = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
+        id: doc.id, // ✅ Document ID le lo
         ...doc.data(),
       }));
-
       setRestaurants(data);
     } catch (error) {
       console.log("Error fetching restaurants:", error);
@@ -59,14 +56,13 @@ const Home = () => {
     extrapolate: "clamp",
   });
 
+  // ✅ ID se navigation
   const renderItem = ({ item }) => (
     <TouchableOpacity
-      onPress={() =>
-        router.push({
-          pathname: "/restaurent/[restaurant]",
-          params: { restaurant: item.name },
-        })
-      }
+      onPress={() => {
+        // Document ID bhejo
+        router.push(`/restaurent/${encodeURIComponent(item.name)}`);
+      }}
       className="bg-[#3f3f3f] rounded-2xl p-3 mr-4 w-56 shadow-lg"
     >
       <Image
