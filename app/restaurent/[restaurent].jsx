@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable eqeqeq */
@@ -21,10 +22,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 export default function Restaurant() {
   const params = useLocalSearchParams();
-  console.log("📥 Params:", params);
-
   const restaurent = params.restaurent || params.restaurants || params.name;
-
   const router = useRouter();
   const flatListRef = useRef(null);
   const windowWidth = Dimensions.get("window").width;
@@ -34,6 +32,7 @@ export default function Restaurant() {
   const [carouselData, setCarouselData] = useState([]);
   const [slotsData, setSlotsData] = useState([]);
   const [debug, setDebug] = useState("");
+  const [activeIndex, setActiveIndex] = useState(0);
 
   if (!restaurent) {
     return (
@@ -43,7 +42,7 @@ export default function Restaurant() {
     );
   }
 
-  const carouselItem = ({ item, index }) => (
+  const carouselItem = ({ item }) => (
     <View style={{ width: windowWidth, alignItems: "center" }}>
       <Image
         source={{ uri: item }}
@@ -54,21 +53,6 @@ export default function Restaurant() {
         }}
         resizeMode="cover"
       />
-      <View
-        style={{
-          position: "absolute",
-          bottom: 20,
-          left: 32,
-          backgroundColor: "rgba(0,0,0,0.7)",
-          paddingHorizontal: 15,
-          paddingVertical: 8,
-          borderRadius: 20,
-        }}
-      >
-        <Text className="text-white font-semibold text-base">
-          {restaurantData.name || restaurent} - View {index + 1}
-        </Text>
-      </View>
     </View>
   );
 
@@ -77,7 +61,6 @@ export default function Restaurant() {
       setLoading(true);
       setDebug("🔍 Finding restaurant...");
 
-      // 1. Restaurant dhundo
       const restaurantsQuery = query(
         collection(db, "restaurants"),
         where("name", "==", restaurent),
@@ -91,31 +74,26 @@ export default function Restaurant() {
       }
 
       const restaurantDoc = restaurantsSnapshot.docs[0];
-      const resId = restaurantDoc.id; // "restaurants_1", "restaurants_2", etc.
+      const resId = restaurantDoc.id;
       const data = restaurantDoc.data();
 
-      // Extract restaurant number
       const restaurantNumber = resId.split("_")[1];
 
       setDebug(`✅ Restaurant: ${restaurent}, Number: ${restaurantNumber}`);
       setRestaurantData(data);
 
-      // 2. Try all possible res_id formats
       const possibleFormats = [
         `/restaurants/restaurant_${restaurantNumber}`,
         `restaurants/restaurant_${restaurantNumber}`,
         `/restaurants/${resId}`,
         `restaurants/${resId}`,
-        `/restaurants/restaurant_${restaurantNumber}`,
       ];
 
       let images = [];
       let matchedFormat = "";
 
-      // 3. Get all carousel documents
       const allCarouselSnapshot = await getDocs(collection(db, "carousel"));
 
-      // 4. Find matching documents by res_id
       for (const format of possibleFormats) {
         const matchingDocs = [];
         allCarouselSnapshot.forEach((doc) => {
@@ -136,14 +114,11 @@ export default function Restaurant() {
         }
       }
 
-      // 5. If still no images, try by document ID pattern
       if (images.length === 0) {
-        console.log("🔍 Trying by document ID pattern...");
         allCarouselSnapshot.forEach((doc) => {
           const docData = doc.data();
-          // Check if document ID contains the restaurant number
           if (doc.id.includes(`_${restaurantNumber}`) && docData.images) {
-            if (docData.images && Array.isArray(docData.images)) {
+            if (Array.isArray(docData.images)) {
               images = [...images, ...docData.images];
             }
           }
@@ -155,7 +130,6 @@ export default function Restaurant() {
       );
       setCarouselData(images);
 
-      // 6. Slots data
       const slotsQuery = query(
         collection(db, "slots"),
         where("ref_id", "==", `/restaurants/${resId}`),
@@ -165,7 +139,7 @@ export default function Restaurant() {
       let slots = [];
       slotsSnapshot.forEach((slotDoc) => {
         const slotData = slotDoc.data();
-        if (slotData.slot && Array.isArray(slotData.slot)) {
+        if (Array.isArray(slotData.slot)) {
           slots = [...slots, ...slotData.slot];
         }
       });
@@ -200,14 +174,6 @@ export default function Restaurant() {
       ]}
     >
       <ScrollView className="flex-1">
-        {/* Debug Info - Remove after fixing */}
-        <View className="bg-gray-900 p-3 m-2 rounded-lg">
-          <Text className="text-yellow-400">Debug: {debug}</Text>
-          <Text className="text-white">
-            Images found: {carouselData.length}
-          </Text>
-        </View>
-
         {/* Header */}
         <View className="px-4 py-3">
           <View className="flex-row items-center">
@@ -221,9 +187,59 @@ export default function Restaurant() {
           <View className="border-b border-[#f49b33] mt-2" />
         </View>
 
+        {/* Carousel */}
+        {carouselData.length > 0 ? (
+          <View className="mb-2 relative">
+            <FlatList
+              ref={flatListRef}
+              data={carouselData}
+              renderItem={carouselItem}
+              keyExtractor={(item, index) => index.toString()}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              pagingEnabled
+              snapToInterval={windowWidth}
+              decelerationRate="fast"
+              onMomentumScrollEnd={(event) => {
+                const index = Math.round(
+                  event.nativeEvent.contentOffset.x / windowWidth,
+                );
+                setActiveIndex(index);
+              }}
+            />
+
+            <View className="absolute bottom-3 left-0 right-0 flex-row justify-center items-center">
+              <View className="flex-row bg-black/40 px-3 py-1 rounded-full">
+                {carouselData.map((_, index) => {
+                  // Sirf 5 dots show logic
+                  if (index >= activeIndex - 2 && index <= activeIndex + 2) {
+                    return (
+                      <View
+                        key={index}
+                        className={`h-2 w-2 mx-1 rounded-full ${
+                          activeIndex === index
+                            ? "bg-white scale-125"
+                            : "bg-gray-400"
+                        }`}
+                      />
+                    );
+                  }
+                  return null;
+                })}
+              </View>
+            </View>
+          </View>
+        ) : (
+          <View className="mx-4 h-48 bg-gray-800 rounded-2xl justify-center items-center">
+            <Ionicons name="images-outline" size={50} color="#666" />
+            <Text className="text-gray-500 mt-2">No images in database</Text>
+            <Text className="text-gray-600 text-xs mt-1">{debug}</Text>
+          </View>
+        )}
+
         {/* Restaurant Details */}
         {Object.keys(restaurantData).length > 0 && (
-          <View className="mx-4 mb-4 bg-gray-800 rounded-xl p-4">
+          <View className="mx-4 bg-gray-800 rounded-xl p-4 border-[#f49b33] border-2 mt-2">
             <View className="flex-row items-center">
               <Ionicons name="restaurant-outline" size={24} color="#f49b33" />
               <Text className="text-white text-xl font-bold ml-2">
@@ -233,8 +249,8 @@ export default function Restaurant() {
 
             {restaurantData.address && (
               <View className="flex-row items-center mt-2">
-                <Ionicons name="location-outline" size={18} color="#9ca3af" />
-                <Text className="text-gray-400 ml-2 flex-1">
+                <Ionicons name="location-outline" size={18} color="#f49b33" />
+                <Text className="text-gray-400 ml-2 flex-1 italic font-semibold">
                   {restaurantData.address}
                 </Text>
               </View>
@@ -253,65 +269,6 @@ export default function Restaurant() {
                   {restaurantData.seats} seats
                 </Text>
               </View>
-            </View>
-          </View>
-        )}
-
-        {/* Carousel */}
-        {carouselData.length > 0 ? (
-          <View className="mb-4">
-            <Text className="text-white text-lg font-semibold px-4 mb-2">
-              📸 Gallery ({carouselData.length} images)
-            </Text>
-            <FlatList
-              ref={flatListRef}
-              data={carouselData}
-              renderItem={carouselItem}
-              keyExtractor={(item, index) => index.toString()}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              pagingEnabled
-              snapToInterval={windowWidth}
-              decelerationRate="fast"
-            />
-            {/* Pagination Dots */}
-            {carouselData.length > 1 && (
-              <View className="flex-row justify-center mt-2">
-                {carouselData.map((_, index) => (
-                  <View
-                    key={index}
-                    className={`w-2 h-2 rounded-full mx-1 ${
-                      index === 0 ? "bg-[#f49b33]" : "bg-gray-600"
-                    }`}
-                  />
-                ))}
-              </View>
-            )}
-          </View>
-        ) : (
-          <View className="mx-4 h-48 bg-gray-800 rounded-2xl justify-center items-center">
-            <Ionicons name="images-outline" size={50} color="#666" />
-            <Text className="text-gray-500 mt-2">No images in database</Text>
-            <Text className="text-gray-600 text-xs mt-1">{debug}</Text>
-          </View>
-        )}
-
-        {/* Slots */}
-        {slotsData.length > 0 && (
-          <View className="px-4 mt-2 mb-6">
-            <Text className="text-white text-lg font-semibold mb-3">
-              ⏰ Available Slots ({slotsData.length})
-            </Text>
-            <View className="flex-row flex-wrap">
-              {slotsData.map((slot, index) => (
-                <TouchableOpacity
-                  key={index}
-                  className="bg-[#f49b33] rounded-lg px-4 py-2 mr-2 mb-2"
-                  onPress={() => alert(`Selected slot: ${slot}`)}
-                >
-                  <Text className="text-white font-semibold">{slot}</Text>
-                </TouchableOpacity>
-              ))}
             </View>
           </View>
         )}
