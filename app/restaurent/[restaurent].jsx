@@ -19,6 +19,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../config/firebaseConfig";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import DatePicker from "../../components/DatePicker";
+import GuestPicker from "../../components/GuestPicker";
 
 export default function Restaurant() {
   const params = useLocalSearchParams();
@@ -33,6 +35,8 @@ export default function Restaurant() {
   const [slotsData, setSlotsData] = useState([]);
   const [debug, setDebug] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
+  const [selectedNumber, setSelectedNumber] = useState(2);
+  const [date, setDate] = useState(new Date());
 
   if (!restaurent) {
     return (
@@ -272,6 +276,31 @@ export default function Restaurant() {
             </View>
           </View>
         )}
+
+        <View className="mx-4 border-2 m-2 p-2 border-[#f49b33] rounded-xl">
+          <View className="flex-1 flex-row m-2 p-2 justify-end items-center border-[#f49b33] rounded-xl border-2">
+            <View className="flex-1 flex-row ">
+              <Ionicons name="calendar" size={20} color="#f49b33" />
+              <Text className="text-white mx-2 text-base">
+                Select Booking Date
+              </Text>
+            </View>
+            <DatePicker date={date} setDate={setDate} />
+          </View>
+          <View className=" flex-1 flex-row h-14 bg-[#474747]  m-2 p-2 justify-end items-center border-[#f49b33] rounded-xl border-2">
+            <View className="flex-1 flex-row">
+              <Ionicons name="people" size={20} color="#f49b33" />
+              <Text className="text-white mx-2 text-base">
+                Select Number Of Guests
+              </Text>
+            </View>
+
+            <GuestPicker
+              selectedNumber={selectedNumber}
+              setSelectedNumber={setSelectedNumber}
+            />
+          </View>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
