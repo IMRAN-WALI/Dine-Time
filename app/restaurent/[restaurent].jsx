@@ -2,37 +2,40 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable eqeqeq */
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
 import {
-  View,
-  Text,
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  Image,
   Platform,
   ScrollView,
-  FlatList,
-  Dimensions,
-  Image,
+  Text,
   TouchableOpacity,
-  ActivityIndicator,
+  View,
 } from "react-native";
-import { useEffect, useRef, useState } from "react";
-import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../../config/firebaseConfig";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import DatePicker from "../../components/DatePicker";
+import FindSlots from "../../components/FindSlots";
 import GuestPicker from "../../components/GuestPicker";
+import { db } from "../../config/firebaseConfig";
 
 export default function Restaurant() {
   const params = useLocalSearchParams();
   const restaurent = params.restaurent || params.restaurants || params.name;
   const router = useRouter();
   const flatListRef = useRef(null);
+  const scrollViewRef = useRef(null);
   const windowWidth = Dimensions.get("window").width;
 
   const [loading, setLoading] = useState(true);
   const [restaurantData, setRestaurantData] = useState({});
   const [carouselData, setCarouselData] = useState([]);
   const [slotsData, setSlotsData] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState(null);
   const [debug, setDebug] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedNumber, setSelectedNumber] = useState(2);
@@ -83,9 +86,10 @@ export default function Restaurant() {
 
       const restaurantNumber = resId.split("_")[1];
 
-      setDebug(`✅ Restaurant: ${restaurent}, Number: ${restaurantNumber}`);
+      setDebug(`✅ Restaurant: ${restaurent}`);
       setRestaurantData(data);
 
+      // Carousel images (keep as is)
       const possibleFormats = [
         `/restaurants/restaurant_${restaurantNumber}`,
         `restaurants/restaurant_${restaurantNumber}`,
@@ -129,25 +133,30 @@ export default function Restaurant() {
         });
       }
 
-      setDebug(
-        `Format: ${matchedFormat || "Document ID match"}, Images: ${images.length}`,
-      );
       setCarouselData(images);
-
-      const slotsQuery = query(
-        collection(db, "slots"),
-        where("ref_id", "==", `/restaurants/${resId}`),
-      );
-      const slotsSnapshot = await getDocs(slotsQuery);
+      const slotsSnapshot = await getDocs(collection(db, "slots"));
 
       let slots = [];
-      slotsSnapshot.forEach((slotDoc) => {
-        const slotData = slotDoc.data();
-        if (Array.isArray(slotData.slot)) {
-          slots = [...slots, ...slotData.slot];
+      if (slotsSnapshot.size > 0) {
+        const firstDoc = slotsSnapshot.docs[0];
+        const slotData = firstDoc.data();
+
+        if (slotData.slot && Array.isArray(slotData.slot)) {
+          slots = slotData.slot;
+        } else if (slotData.slots && Array.isArray(slotData.slots)) {
+          slots = slotData.slots;
         }
-      });
+      } else {
+        console.log("No slots collection found");
+      }
+
       setSlotsData(slots);
+
+      if (slots.length > 0) {
+        setDebug(`✅ Found ${slots.length} time slots`);
+      } else {
+        setDebug(`⚠️ No slots found in database`);
+      }
     } catch (error) {
       console.log("❌ Error:", error);
       setDebug(`Error: ${error.message}`);
@@ -160,11 +169,15 @@ export default function Restaurant() {
     getRestaurantData();
   }, [restaurent]);
 
+  const scrollToBottom = () => {
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  };
+
   if (loading) {
     return (
       <SafeAreaView className="flex-1 bg-[#2b2b2b] justify-center items-center">
         <ActivityIndicator size="large" color="#f49b33" />
-        <Text className="text-white mt-4">{debug}</Text>
+        <Text className="text-white mt-4 px-4 text-center">{debug}</Text>
       </SafeAreaView>
     );
   }
@@ -176,8 +189,14 @@ export default function Restaurant() {
         Platform.OS == "android" && { paddingBottom: 1 },
         Platform.OS == "ios" && { paddingBottom: 20 },
       ]}
+      className="flex-1"
     >
-      <ScrollView className="flex-1">
+      <ScrollView
+        ref={scrollViewRef}
+        className="flex-1"
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 40 }}
+      >
         {/* Header */}
         <View className="px-4 py-3">
           <View className="flex-row items-center">
@@ -215,7 +234,6 @@ export default function Restaurant() {
             <View className="absolute bottom-3 left-0 right-0 flex-row justify-center items-center">
               <View className="flex-row bg-black/40 px-3 py-1 rounded-full">
                 {carouselData.map((_, index) => {
-                  // Sirf 5 dots show logic
                   if (index >= activeIndex - 2 && index <= activeIndex + 2) {
                     return (
                       <View
@@ -236,8 +254,7 @@ export default function Restaurant() {
         ) : (
           <View className="mx-4 h-48 bg-gray-800 rounded-2xl justify-center items-center">
             <Ionicons name="images-outline" size={50} color="#666" />
-            <Text className="text-gray-500 mt-2">No images in database</Text>
-            <Text className="text-gray-600 text-xs mt-1">{debug}</Text>
+            <Text className="text-gray-500 mt-2">No images available</Text>
           </View>
         )}
 
@@ -277,27 +294,44 @@ export default function Restaurant() {
           </View>
         )}
 
+        {/* Date and Guest Selection */}
         <View className="mx-4 border-2 m-2 p-2 border-[#f49b33] rounded-xl">
           <View className="flex-1 flex-row m-2 p-2 justify-end items-center border-[#f49b33] rounded-xl border-2">
-            <View className="flex-1 flex-row ">
+            <View className="flex-row flex-1">
               <Ionicons name="calendar" size={20} color="#f49b33" />
-              <Text className="text-white mx-2 text-base">
-                Select Booking Date
-              </Text>
+              <Text className="text-white mx-2 text-base">Booking Date</Text>
             </View>
             <DatePicker date={date} setDate={setDate} />
           </View>
-          <View className=" flex-1 flex-row h-14 bg-[#474747]  m-2 p-2 justify-end items-center border-[#f49b33] rounded-xl border-2">
-            <View className="flex-1 flex-row">
+
+          <View className="flex-1 flex-row h-14 bg-[#474747]  m-2 p-2 justify-end items-center border-[#f49b33] rounded-xl border-2">
+            <View className="flex-row flex-1">
               <Ionicons name="people" size={20} color="#f49b33" />
               <Text className="text-white mx-2 text-base">
-                Select Number Of Guests
+                Number of Guests
               </Text>
             </View>
-
             <GuestPicker
               selectedNumber={selectedNumber}
               setSelectedNumber={setSelectedNumber}
+            />
+          </View>
+        </View>
+
+        {/* Find Slots Component */}
+        <View className="mx-4 mb-6">
+          <View className="bg-[#1f1f1f] border-2 border-[#f49b33] rounded-2xl p-3">
+            <Text className="text-[#f49b33] text-lg font-bold mb-2 text-center">
+              Book Your Table
+            </Text>
+            <FindSlots
+              restaurant={restaurent}
+              date={date}
+              selectedNumber={selectedNumber}
+              slots={slotsData}
+              selectedSlot={selectedSlot}
+              setSelectedSlot={setSelectedSlot}
+              scrollToBottom={scrollToBottom}
             />
           </View>
         </View>
