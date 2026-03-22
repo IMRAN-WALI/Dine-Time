@@ -319,10 +319,10 @@ export default function Restaurant() {
         </View>
 
         {/* Find Slots Component */}
-        <View className="mx-4 mb-6">
+        <View className="mx-4">
           <View className="bg-[#1f1f1f] border-2 border-[#f49b33] rounded-2xl p-3">
             <Text className="text-[#f49b33] text-lg font-bold mb-2 text-center">
-              Book Your Table
+              Book Your Slots
             </Text>
             <FindSlots
               restaurant={restaurent}

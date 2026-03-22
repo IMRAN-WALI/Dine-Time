@@ -20,26 +20,24 @@ import { useRouter } from "expo-router";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const router = useRouter();
 
-  const handleSignup = (values) => {
-    // Handle signup logic here
-    console.log("Signup values:", values);
-  };
+  const handleSignup = () => {};
 
   return (
     <SafeAreaView className="flex-1 bg-[#2b2b2b]">
       <StatusBar barStyle={"light-content"} backgroundColor={"#2b2b2b"} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="m-2 flex justify-center items-center">
-          <Image source={Logo} style={{ width: 200, height: 200 }} />
-          <Text className="text-3xl text-center text-white font-bold mb-4">
+          <Image source={Logo} style={{ width: 100, height: 100 }} />
+          <Text className="text-3xl text-center text-white font-bold">
             Let's Get Started
           </Text>
 
           <View className="w-5/6">
             <Formik
-              initialValues={{ email: "", password: "" }}
+              initialValues={{ email: "", password: "", confirmPassword: "" }}
               validationSchema={validationSchema}
               onSubmit={handleSignup}
             >
@@ -74,7 +72,7 @@ const Signup = () => {
                     </Text>
                   )}
 
-                  <Text className="text-[#f49b33] text-lg font-semibold mt-4 mb-2">
+                  <Text className="text-[#f49b33] text-lg font-semibold mt-2 mb-2">
                     Password
                   </Text>
                   <View className="flex-row items-center border border-white rounded-lg px-3">
@@ -106,6 +104,47 @@ const Signup = () => {
                   {touched.password && errors.password && (
                     <Text className="text-red-500 text-xs mt-1 ml-1">
                       {errors.password}
+                    </Text>
+                  )}
+
+                  <Text className="text-[#f49b33] text-lg font-semibold mt-2 mb-2">
+                    Confirm Password
+                  </Text>
+                  <View className="flex-row items-center border border-white rounded-lg px-3">
+                    <Ionicons
+                      name="lock-closed-outline"
+                      size={20}
+                      color="#f49b33"
+                    />
+                    <TextInput
+                      className="flex-1 h-12 text-white ml-2"
+                      value={values.confirmPassword}
+                      onChangeText={handleChange("confirmPassword")}
+                      onBlur={handleBlur("confirmPassword")}
+                      secureTextEntry={!showConfirmPassword}
+                      placeholder="Confirm your password"
+                      placeholderTextColor="#888"
+                    />
+                    <TouchableOpacity
+                      onPress={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="p-2"
+                    >
+                      <Ionicons
+                        name={
+                          showConfirmPassword
+                            ? "eye-off-outline"
+                            : "eye-outline"
+                        }
+                        size={22}
+                        color="#f49b33"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  {touched.confirmPassword && errors.confirmPassword && (
+                    <Text className="text-red-500 text-xs mt-1 ml-1">
+                      {errors.confirmPassword}
                     </Text>
                   )}
 

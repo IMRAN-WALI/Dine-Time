@@ -12,7 +12,7 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import { useRouter } from "expo-router"; // ← ADD THIS IMPORT
+import { useRouter } from "expo-router";
 import { db } from "../config/firebaseConfig";
 import validationSchema from "../utils/authSchema";
 
@@ -25,7 +25,7 @@ const FindSlots = ({
   restaurant,
   scrollToBottom,
 }) => {
-  const router = useRouter(); // ← ADD THIS LINE
+  const router = useRouter();
   const [slotsVisible, setSlotsVisible] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [formVisible, setFormVisible] = useState(false);
