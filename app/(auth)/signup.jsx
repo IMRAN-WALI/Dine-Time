@@ -9,6 +9,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import entryImg from "../../assets/images/Frame.png";
@@ -18,12 +19,59 @@ import { useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 
+// Firebase Imports
+import { auth, db } from "../../config/firebaseConfig";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
 
-  const handleSignup = () => {};
+  const handleSignup = async (values) => {
+    const { email, password } = values;
+    setLoading(true);
+
+    try {
+      // Create user in Firebase Authentication
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password,
+      );
+      const user = userCredential.user;
+
+      // Create user document in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        uid: user.uid,
+        email: email,
+        createdAt: new Date().toISOString(),
+      });
+
+      Alert.alert("Success", "Account created successfully!", [
+        { text: "OK", onPress: () => router.replace("/signin") },
+      ]);
+    } catch (error) {
+      let errorMessage = "Something went wrong. Please try again.";
+
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage = "This email is already registered.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage = "Password should be at least 6 characters long.";
+      } else {
+        errorMessage = error.message;
+      }
+
+      Alert.alert("Signup Failed", errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-[#2b2b2b]">
@@ -150,10 +198,11 @@ const Signup = () => {
 
                   <TouchableOpacity
                     onPress={handleSubmit}
+                    disabled={loading}
                     className="py-3 my-6 bg-[#f49b33] rounded-lg"
                   >
                     <Text className="text-lg font-bold text-center text-black">
-                      Sign Up
+                      {loading ? "Creating Account..." : "Sign Up"}
                     </Text>
                   </TouchableOpacity>
 

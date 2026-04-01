@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable react/no-unescaped-entities */
 import { Formik } from "formik";
@@ -9,6 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import entryImg from "../../assets/images/Frame.png";
@@ -18,13 +20,58 @@ import { useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 
+// Firebase Imports
+import { auth } from "../../config/firebaseConfig";
+import { signInWithEmailAndPassword } from "firebase/auth";
+
 const Signin = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleSignin = (values) => {
-    // Handle signin logic here
-    console.log("Signin values:", values);
+  const handleSignin = async (values) => {
+    const { email, password } = values;
+
+    console.log("✅ handleSignin called with:", { email, password });
+
+    setLoading(true);
+
+    try {
+      console.log("🔥 Calling Firebase signIn...");
+
+      await signInWithEmailAndPassword(auth, email, password);
+
+      console.log("✅ Firebase signin successful!");
+
+      Alert.alert("Success", "Signed in successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/(tabs)/home"),
+        },
+      ]);
+    } catch (error) {
+      console.error("❌ Signin Error:", error.code, error.message);
+
+      let errorMessage = "Invalid email or password";
+
+      if (
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password"
+      ) {
+        errorMessage = "Incorrect email or password. Please try again.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.code === "auth/too-many-requests") {
+        errorMessage =
+          "Too many failed attempts. Please wait a while and try again.";
+      } else {
+        errorMessage = error.message;
+      }
+
+      Alert.alert("Sign In Failed", errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -40,7 +87,6 @@ const Signin = () => {
           <View className="w-5/6">
             <Formik
               initialValues={{ email: "", password: "" }}
-              validationSchema={validationSchema}
               onSubmit={handleSignin}
             >
               {({
@@ -66,6 +112,7 @@ const Signin = () => {
                       placeholder="Enter your email"
                       placeholderTextColor="#888"
                       autoCapitalize="none"
+                      editable={!loading}
                     />
                   </View>
                   {touched.email && errors.email && (
@@ -91,10 +138,12 @@ const Signin = () => {
                       secureTextEntry={!showPassword}
                       placeholder="Enter your password"
                       placeholderTextColor="#888"
+                      editable={!loading}
                     />
                     <TouchableOpacity
                       onPress={() => setShowPassword(!showPassword)}
                       className="p-2"
+                      disabled={loading}
                     >
                       <Ionicons
                         name={showPassword ? "eye-off-outline" : "eye-outline"}
@@ -112,6 +161,7 @@ const Signin = () => {
                   <TouchableOpacity
                     onPress={() => router.push("/forgot-password")}
                     className="self-end mt-2"
+                    disabled={loading}
                   >
                     <Text className="text-[#f49b33] text-sm">
                       Forgot Password?
@@ -120,16 +170,20 @@ const Signin = () => {
 
                   <TouchableOpacity
                     onPress={handleSubmit}
+                    disabled={loading}
                     className="py-3 my-6 bg-[#f49b33] rounded-lg"
                   >
                     <Text className="text-lg font-bold text-center text-black">
-                      Sign In
+                      {loading ? "Signing In..." : "Sign In"}
                     </Text>
                   </TouchableOpacity>
 
                   <View className="flex-row justify-center items-center">
                     <Text className="text-white">Don't have an account? </Text>
-                    <TouchableOpacity onPress={() => router.push("/signup")}>
+                    <TouchableOpacity
+                      onPress={() => router.push("/signup")}
+                      disabled={loading}
+                    >
                       <Text className="text-[#f49b33] font-semibold underline">
                         Sign Up
                       </Text>
