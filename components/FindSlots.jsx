@@ -33,11 +33,8 @@ const FindSlots = ({
   const handlePress = () => {
     const newVisibility = !slotsVisible;
     setSlotsVisible(newVisibility);
-
     if (newVisibility && scrollToBottom && slots.length > 0) {
-      setTimeout(() => {
-        scrollToBottom();
-      }, 150);
+      setTimeout(() => scrollToBottom(), 150);
     }
   };
 
@@ -47,11 +44,17 @@ const FindSlots = ({
       return;
     }
 
-    const userEmail = await AsyncStorage.getItem("userEmail");
-    const guestStatus = await AsyncStorage.getItem("isGuest");
+    try {
+      const userEmail = await AsyncStorage.getItem("userEmail");
+      const guestStatus = await AsyncStorage.getItem("isGuest");
 
-    if (userEmail) {
-      try {
+      console.log("=== BOOKING DEBUG ===");
+      console.log("Stored userEmail:", userEmail);
+      console.log("Stored isGuest:", guestStatus);
+      console.log("=====================");
+
+      // === Case 1: Logged in User ===
+      if (userEmail && userEmail.trim() !== "") {
         await addDoc(collection(db, "bookings"), {
           email: userEmail,
           slot: selectedSlot,
@@ -60,25 +63,47 @@ const FindSlots = ({
           restaurant: restaurant,
           bookingTime: new Date().toISOString(),
         });
+
         Alert.alert("Success", "🎉 Table booked successfully!");
+
         setSelectedSlot(null);
         setSlotsVisible(false);
-      } catch (error) {
-        console.log(error);
-        Alert.alert("Error", "Failed to book slot. Please try again.");
       }
-    } else if (guestStatus === "true") {
-      setFormVisible(true);
-      setModalVisible(true);
-    } else {
-      Alert.alert(
-        "Login Required",
-        "Please login or continue as guest to book a table.",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Login", onPress: () => router.push("/login") },
-        ],
-      );
+      // === Case 2: Guest User ===
+      else if (guestStatus === "true") {
+        Alert.alert(
+          "Signup Required",
+          "Guest users cannot book tables directly.\n\nPlease create an account to continue booking.",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Sign Up",
+              onPress: () => router.push("/signup"),
+            },
+          ],
+        );
+      }
+      // === Case 3: Not logged in at all ===
+      else {
+        Alert.alert(
+          "Login Required",
+          "Please login or create an account to book a table.",
+          [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Login",
+              onPress: () => router.push("/signin"),
+            },
+            {
+              text: "Sign Up",
+              onPress: () => router.push("/signup"),
+            },
+          ],
+        );
+      }
+    } catch (error) {
+      console.log("Booking error:", error);
+      Alert.alert("Error", "Failed to book slot. Please try again.");
     }
   };
 
@@ -88,11 +113,7 @@ const FindSlots = ({
   };
 
   const handleSlotPress = (slot) => {
-    if (selectedSlot === slot) {
-      setSelectedSlot(null);
-    } else {
-      setSelectedSlot(slot);
-    }
+    setSelectedSlot(selectedSlot === slot ? null : slot);
   };
 
   const handleFormSubmit = async (values) => {
@@ -105,13 +126,15 @@ const FindSlots = ({
         restaurant: restaurant,
         bookingTime: new Date().toISOString(),
       });
+
       Alert.alert("Success", "🎉 Booking confirmed!");
+
       setModalVisible(false);
       setFormVisible(false);
       setSelectedSlot(null);
       setSlotsVisible(false);
     } catch (error) {
-      console.log(error);
+      console.log("Guest booking error:", error);
       Alert.alert("Error", "Failed to book. Please try again.");
     }
   };
@@ -151,7 +174,7 @@ const FindSlots = ({
               🕐 Available Time Slots
             </Text>
             <Text className="text-gray-400 text-xs">
-              {slots?.length} slots available
+              {slots?.length || 0} slots available
             </Text>
           </View>
 
@@ -192,7 +215,7 @@ const FindSlots = ({
         </View>
       )}
 
-      {/* Modal */}
+      {/* Guest Details Modal */}
       <Modal
         visible={modalVisible}
         transparent

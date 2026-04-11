@@ -18,8 +18,6 @@ import validationSchema from "../../utils/authSchema";
 import { useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-
-// Firebase Imports
 import { auth, db } from "../../config/firebaseConfig";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";

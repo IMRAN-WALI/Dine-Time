@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable react/no-unescaped-entities */
 import { Formik } from "formik";
@@ -15,12 +14,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import entryImg from "../../assets/images/Frame.png";
 import Logo from "../../assets/images/MainLogo.png";
-import validationSchema from "../../utils/authSchema";
 import { useState } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-
-// Firebase Imports
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { auth } from "../../config/firebaseConfig";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
@@ -31,17 +28,20 @@ const Signin = () => {
 
   const handleSignin = async (values) => {
     const { email, password } = values;
-
     console.log("✅ handleSignin called with:", { email, password });
-
     setLoading(true);
 
     try {
       console.log("🔥 Calling Firebase signIn...");
-
       await signInWithEmailAndPassword(auth, email, password);
-
       console.log("✅ Firebase signin successful!");
+
+      // 🔥🔥 Save User Data to AsyncStorage
+      await AsyncStorage.setItem("userEmail", email);
+      await AsyncStorage.setItem("userName", email.split("@")[0]); // Default naam (email ka pehla part)
+      await AsyncStorage.setItem("isGuest", "false");
+
+      console.log("✅ Email & Name saved to AsyncStorage:", email);
 
       Alert.alert("Success", "Signed in successfully!", [
         {
@@ -51,9 +51,7 @@ const Signin = () => {
       ]);
     } catch (error) {
       console.error("❌ Signin Error:", error.code, error.message);
-
       let errorMessage = "Invalid email or password";
-
       if (
         error.code === "auth/user-not-found" ||
         error.code === "auth/wrong-password"
@@ -67,7 +65,6 @@ const Signin = () => {
       } else {
         errorMessage = error.message;
       }
-
       Alert.alert("Sign In Failed", errorMessage);
     } finally {
       setLoading(false);
@@ -83,7 +80,6 @@ const Signin = () => {
           <Text className="text-3xl text-center text-white font-bold mb-4">
             Welcome Back!
           </Text>
-
           <View className="w-5/6">
             <Formik
               initialValues={{ email: "", password: "" }}
