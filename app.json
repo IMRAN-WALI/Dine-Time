@@ -19,7 +19,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "androidNavigationBar": {
+        "barStyle": "light-content",
+        "backgroundColor": "#2b2b2b"
+      }
     },
     "web": {
       "bundler": "metro",
@@ -40,7 +44,8 @@
           }
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-navigation-bar"
     ],
     "experiments": {
       "typedRoutes": true,

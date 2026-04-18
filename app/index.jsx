@@ -1,11 +1,11 @@
 import { useRouter } from "expo-router";
 import {
-  Image,
-  ScrollView,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
+    Image,
+    ScrollView,
+    StatusBar,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Logo from "../assets/images/FirstPage.png";
@@ -14,10 +14,10 @@ import entryImg from "../assets/images/Frame.png";
 export default function Index() {
   const router = useRouter();
   return (
-    <SafeAreaView className=" bg-[#2b2b2b]">
+    <SafeAreaView className="flex-1 bg-[#2b2b2b]">
       <StatusBar barStyle={"light-content"} backgroundColor={"#2b2b2b"} />
-      <ScrollView contentContainerStyle={{ height: "100%" }}>
-        <View className="flex justify-center items-center">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View className="flex-1 justify-center items-center">
           <Image source={Logo} style={{ width: 400, height: 400 }} />
           <View className="w-3/4">
             <TouchableOpacity
@@ -51,7 +51,7 @@ export default function Index() {
             </Text>
           </TouchableOpacity>
         </View>
-        <View className="felx-1">
+        <View className="flex-1">
           <Image source={entryImg} className="w-full" resizeMode="contain" />
         </View>
       </ScrollView>
