@@ -76,7 +76,7 @@ const Signin = () => {
       <StatusBar barStyle={"light-content"} backgroundColor={"#2b2b2b"} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="m-2 flex justify-center items-center">
-          <Image source={Logo} style={{ width: 150, height: 150 }} />
+          <Image source={Logo} style={{ width: 250, height: 250 }} />
           <Text className="text-3xl text-center text-white font-bold mb-4">
             Welcome Back!
           </Text>
